@@ -24,85 +24,322 @@
 SIFT算法在图像空间中寻找极值点，并提取出其位置、尺度、旋转不变数。SIFT方法获取图像并将其转换为大量局部特征载体。这些特征载体中的每一个都不受图像的任何缩放、旋转或平移的影响。
 SIFT的优点在于在很大范围内对仿射失真、噪声的增加和照明的变化都具有很强的鲁棒性。并且SIFT的计算效率很高，可以在标准PC硬件上以近乎实时的性能从典型图像中提取数千个关键点。
 \par
-由于SIFT的广泛使用，与SIFT相关的隐私和安全问题也引起了高度关注。\cite{9762698}\cite{Qin2014TowardsEP}
-SIFT作为一种源自图像的局部特征，包含丰富的图像内容信息。\cite{10214250}事实证明，攻击者可以根据SIFT获取隐私信息。\cite{10.1145/3386082}。另外一篇具有代表性的工作\cite{5995616}表明，可以从一个图像的局部描述符来重建图像，重建后的图像能够表现出人类可理解的内容。
+由于SIFT的广泛使用，与SIFT相关的隐私和安全问题也引起了高度关注\cite{9762698}\cite{Qin2014TowardsEP}。
+SIFT作为一种源自图像的局部特征，包含丰富的图像内容信息\cite{10214250}。事实证明，攻击者可以根据SIFT获取隐私信息\cite{10.1145/3386082}。另外一篇具有代表性的工作\cite{5995616}表明，可以从一个图像的局部描述符来重建图像，重建后的图像能够表现出人类可理解的内容。
 因此，通过利用SIFT进行重建图像的攻击具备了可行性。
 图1简要说明了SIFT可能导致的图像内容泄露过程。为了实现图像检索服务，用户将待查询图像的SIFT传输到远程服务提供商。远程服务提供商使用用户上传的SIFT进行基于内容的图像检索，最终将检索到的图像返回给用户，从而完成一次图像检索。
-假设攻击者可以在这个过程中获取到用户上传的SIFT，那么，攻击者可以用该SIFT作为输入，利用自己的攻击模型生成与原始图像视觉效果近似的图像。\cite{10.1145/3599589.3599596}\cite{SUN2020102642}
+假设攻击者可以在这个过程中获取到用户上传的SIFT，那么，攻击者可以用该SIFT作为输入，利用自己的攻击模型生成与原始图像视觉效果近似的图像\cite{10.1145/3599589.3599596}\cite{SUN2020102642}。
 \par
 本课题主要关注SIFT反向攻击问题。针对目前已有的反向重建图像模型存在的各个问题，从高效率的反向攻击方法、高精准度的反向攻击方法的角度分别进行研究。
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{国内外在该方向的研究现状及分析}
 本章将从SIFT反向攻击研究现状、图像生成模型研究现状描述当前的国内外研究现状并简析。
 \subsection{SIFT反向攻击研究现状}
-在针对SIFT反向攻击的研究方面，早期的研究工作是由Weinzaepfel等人\cite{5995616}首先证明了从SFT特征恢复图像的可行性。他们建立了保存图像补丁与特征点的外部数据库，使用数据库中数据来拼接图像补丁，从而完成重建原始图像的任务。
-Angelo等人\cite{6460288}提出了一种反向优化框架，该框架能够仅依赖特征描述符携带的信息来恢复图像，他们的结果表明导致最佳重建的描述符也会导致最佳检索结果。
-Vondrick等人\cite{Vondrick_2013_ICCV}提出了一种基于词典学习的方法来可视化HOG（Histogram of Oriented Gradients）描述符，该方法在各种不同的本地特征之间表现出了高度的可移植性。
-Desolneux等人\cite{10.1007/978-3-319-58771-4_11}提出了两种基于Poisson编辑和多尺度方向场组合的重建模型。这些模型能够恢复图像的全局形状和许多几何细节,但无需使用任何外部数据库。
-Katod等人\cite{Kato_2014_CVPR}表明，可以从词袋（BoVW）表示中的稀疏局部描述符恢复一些原始图像结构。他们使用大规模的图像数据库来估计局部描述符的空间排列。重建任务转换为了一个关于视觉单词的邻接和全局定位成本的拼图问题。
+在针对SIFT反向攻击的研究方面，早期的研究工作是由Weinzaepfel\cite{5995616}等人首先完成的。他们建立了保存图像补丁与特征点的外部数据库，使用数据库中数据来拼接图像补丁，完成重建原始图像的任务，证明了从SIFT特征恢复图像的可行性。
+Angelo\cite{6460288}等人提出了一种反向优化框架，该框架能够仅依赖特征描述符携带的信息来恢复图像，他们的结果表明导致最佳重建的描述符也会导致最佳检索结果。
+Vondrick\cite{Vondrick_2013_ICCV}等人提出了一种基于词典学习的方法来可视化HOG（Histogram of Oriented Gradients）描述符，该方法在各种不同的本地特征之间表现出了高度的可移植性。
+Desolneux\cite{10.1007/978-3-319-58771-4_11}等人提出了两种基于Poisson编辑和多尺度方向场组合的重建模型。这些模型能够恢复图像的全局形状和许多几何细节,但无需使用任何外部数据库。
+Katod\cite{Kato_2014_CVPR}等人表明，可以从词袋（Bag of Visual Words, BoVW）表示中的稀疏局部描述符恢复一些原始图像结构。他们使用大规模的图像数据库来估计局部描述符的空间排列，将重建任务转换为了一个关于视觉单词的邻接和全局定位成本的拼图问题。
 \par
-随着深度卷积神经网络的普及，许多基于深度学习的SIFT反向攻击方法被提出。
-Mahendrand等人\cite{Mahendran_2015_CVPR}提出了一种基于神经网络的重建图像通用框架，显著提高了重建图像的效果。
-Dosovitski等人\cite{Dosovitskiy_2016_CVPR}的工作将各类特征提取技术视为编码器，利用CNN神经网络设计对应的解码器。结果表明除了对SIFT，HOG，LBP这类浅层特征提取技术重建图像有效外，该模型也可以从卷积神经网络的深层特征出发重建图像。
-Pittaluga等人\cite{Pittaluga_2019_CVPR}训练了一个具有U-Net结构的级联网络，从局部特征中揭示场景。该网络有效地处理高度稀疏和不规则的二维点分布以及具有缺失点属性的输入。
-Wu等人\cite{9393327}通过使用GANs体系结构作为模型主干，同时利用局部二值模式（LBP）特征来弥补SIFT特征在表示图像空间结构方面的局限性，提出了一种深度生成模型SLI，提高了重建图像的效果。该模型由两个网络组成：一个是LBP重建网络，其目的是将SIFT变换为LBP特征；另一个是图像重建网络，它以变换后的LBP为指导产生重建结果。
-Pittaluga等人\cite{Pittaluga_2023_ICCV}最近的一项工作提出了基于数据库的反转攻击和基于聚类的反转攻击，结果表明了即便对SIFT等特征进行后处理，仍然保留了恢复原始图像内容的可行性。
-Li等人\cite{liDeepReverseAttack2024}基于GAN模型，构建了一个两阶段的条件引导生成模型，他们重新设计了生成模型的损失函数，加入了对SIFT特征的衡量。重建图像的过程分为两步，首先利用SIFT生成大致的图像，再把该图像和SIFT特征共同作为二阶段模型的输入，使用多尺度融合技术增强图像细节。结果表明了重建图像的效果更优。
+随着深度卷积神经网络的广泛，许多基于深度学习的SIFT反向攻击方法被提出。
+Mahendrand\cite{Mahendran_2015_CVPR}等人提出了一种基于神经网络的重建图像通用框架，显著提高了重建图像的效果。
+Dosovitski\cite{Dosovitskiy_2016_CVPR}等人的工作将各类特征提取技术视为编码器，利用CNN神经网络设计对应的解码器。结果表明除了对SIFT，HOG，LBP这类浅层特征提取技术重建图像有效外，该模型也可以从卷积神经网络的深层特征出发重建图像。
+Pittaluga\cite{Pittaluga_2019_CVPR}等人训练了一个具有U-Net结构的级联网络，从局部特征中揭示场景。该网络有效地处理高度稀疏和不规则的二维点分布以及具有缺失点属性的输入。
+Wu\cite{9393327}等人通过使用GANs体系结构作为模型主干，同时利用局部二值模式（LBP）特征来弥补SIFT特征在表示图像空间结构方面的局限性，提出了一种深度生成模型SLI。该模型由两个网络组成：一个是LBP重建网络，其目的是将SIFT变换为LBP特征；另一个是图像重建网络，它以变换后的LBP为指导产生重建结果，提高了重建图像的效果。
+另外，Pittaluga\cite{Pittaluga_2023_ICCV}等人最近的一项工作提出了基于数据库的反转攻击和基于聚类的反转攻击，结果表明了即便对SIFT等特征进行后处理，仍然保留了恢复原始图像内容的可行性。
+Li\cite{liDeepReverseAttack2024}等人基于GAN模型，构建了一个两阶段的条件引导生成模型，他们重新设计了生成模型的损失函数，加入了对SIFT特征的衡量。重建图像的过程分为两步，首先利用SIFT生成大致的图像，再把该图像和SIFT特征共同作为二阶段模型的输入，使用多尺度融合技术来增强图像细节。结果表明了重建图像的效果更优。
 综上所述，目前效果较好的SIFT反向攻击方法为基于生成式模型所进行反向攻击，因此，有必要对生成模型进行进一步的研究。
 \subsection{图像生成模型研究现状}
-目前有三个主流的图像生成模型研究方向，分别是基于似然的模型，生成对抗网络（GAN）以及基于能量的模型。\cite{luoUnderstandingDiffusionModels2022}
-基于似然的模型，主要目标是学习为观察到的数据样本分配高似然的模型。代表的模型有自回归模型、流模型和变分自动编码器（VAE）。
-生成对抗网络模型中一般包括判别器和生成器共同运行，其中生成器根据隐空间采样数据生成一个图像，判别器则用于区分生成的图像与原始的图像，在生成器和判别器的相互对抗过程中，生成器逐渐靠近原始图像分布。
+目前有三个主流的图像生成模型研究方向，分别是基于似然的模型，生成对抗网络（GAN）以及基于能量的模型\cite{luoUnderstandingDiffusionModels2022}。
+基于似然的模型，主要目标是学习为观察到的数据样本分配高似然的模型，代表的模型有自回归模型、流模型和变分自动编码器。
+生成对抗网络模型中一般包括判别器和生成器共同运行，其中生成器根据隐空间采样数据生成一个图像，判别器则用于区分生成的图像与原始的图像。训练过程中，生成器和判别器的相互对抗，生成器所学习到的分布逐渐靠近原始图像分布。
 基于能量的模型又称扩散模型，扩散模型一般由前向扩散过程和反向生成过程组成。其中前向扩散过程将图像逐步添加噪声直至变成随机噪声，反向生成过程则将随机噪声逐步去除噪声直至生成图像数据。
-2013年，Kingma[39] 等人提出了变分自编码器(VariationalAuto-Encoder, VAE)模型，通过变分贝叶斯方法，将对原始图像数据的负对数似然的建模优化转为变分下界的计算。编码器将原始图像映射到隐变量，解码器从采样的隐变量恢复原始图像。
-2015年，Sohn[40] 等提出了条件变分自编码器(ConditionalVariationalAuto-Encoder, CVAE) 模型，其在VAE的基础上，引入条件概率，使得在生成时能够按照标签条件生成。可以认为，VAE与CVAE的区别在于数据产生方式，VAE是从隐变量采样后使用网络生成图像数据；而CVAE使用标签采样隐变量，在用隐变量与标签使用网络生成图像数据。CVAE在VAE基础上，利用了标签信息，并能够条件生成图像数据。
-2017年，Van[41]等提出了向量量化变分自编码器(VectorQuantisation Variational Auto-Encoder, VQ-VAE)，其在 VAE 基础上，采用了离散的隐变量，并单独训练一个自回归模型来学习隐变量的先验分布。相比于原始的VAE，VQ-VAE采用了离散编码，并且用了两阶段来生成，让隐变量的先验分布从高斯分布变成可学习的分布，提升了模型的学习能力。
-生成对抗模型方面，2014年，Goodfellow[46] 等提出生成对抗网络(Generative Adversarial Networks, GAN) 模型，其通过一个生成器G和一个判别器D的双方博弈完成训练。对于判别器而言，其优化期望能区分输入图像是生成图像的概率；对于生成器而言，其优化期望是能生成判别器难以分辨真伪的图像。
-2017年，Arjovsky[49] 等提出WGAN(WassersteinGAN,WGAN)模型，该文献认为原始GAN模型的损失函数中使用的对称的JS散度(Jensen–Shannon Divergence) 不能很好体现两个分布之间的差距，使得在初始阶段分布差距过大时难以训练，KL散度对生成器训练阶段的多样性与真实性的惩罚贡献不均衡，使得模式爆炸而难以生成多样性的样本。使用了Wasserstein距离代替了JS散度，解决训练稳定性问题。
-2019年，Karras[51] 等提出了基于风格的StyleGAN网络，该文献使用风格映射网络，将隐空间向量解耦，映射到风格向量上，然后再使用生成器生成图像数据。该文献指出，隐变量的随机向量分布可能和图像特征分布不一致，所以需要风格映射网络，将其映射到图像特征分布，再由图像特征分布生成图像数据。2020年，Karras[52]等在StyleGAN基础上，提出了StyleGAN2模型，针对StyleGAN生成图像中的部分不真实情况，改进了Adain中的归一化问题，优化可损失函数中正则项，添加了路径长度归一化方案，改进了在部分数据集上的生成效果。2021年，Karras[53]等提出了StyleGAN3模型，该文献认为以往的GAN生成过程，特征与像素坐标相关性较高，这导致
-生成图像细节难以移动，于是修改了生成器中的非理想上采样滤波器等不合理源，解决了图像坐标与特征粘连问题，实现了图像旋转平移不变形，提升了图像生成的质量。StyleGAN系列，其使用了隐变量和特征的解耦思路，能够将隐空间映射到特征空间，并使其特征空间平滑。但其训练仍有一定难度，计算资源消耗巨大，且有一定的不稳定性。
-扩散模型系列，2020 年，Ho[54] 等提出了第一个正式的去噪扩散模型DDPM(Denoising Diffusion Probabilistic Models, DDPM)，其包含一个前向的扩散过程和一个反向的生成过程。前向扩散过程中，将原始图像数按马尔科夫过程据逐步添加随机噪声，并逐步变成纯随机噪声；在反向生成过程中，将噪声数据每次去噪并采样，逐步恢复原始数据。DDPM对整个扩散生成过程建模，经过优化将问题转变为预测每一步的随机噪声，并采用神经网络对噪声预测拟合。
-2019年，Song[56]等提出了NCSN(Noise-Conditional Score Networks, NCSN)，其主要思路为分数匹配方法来估算数据分布的分数函数，并通过朗之万动力学采样实现采样生成。由于数据位于高维空间中的低维流行上，难以估计分数函数，则该文献提出了使用不同程度的噪声对其扰动，并联合估计分数函数。该文献为雏形的扩散模型，且该文献从随机微分方程角度简单探讨了扩散模型的概念，也为了后文出现的基于随机微分方程的扩散模型提供了基础。2020年，Song[57] 等针对扩散模型，提出了ScoreSDE框架统一并且解释了扩散模型。该文献从分数匹配与能量模型角度，提出了基于随机微分方程(StochasticDifferential Equations, SDE) 的去噪分数匹配模型。不同于DDPM的离散形式，使用随机微分方程建模的ScoreSDE是连续形式，正向过程通过SDE求解来注入噪声，将图像数据分布转换到已知的先验分布，并使用神经网络模型学习分数，反向过程通过预测并修正的采样方案，最终将噪声去除并从先验分布转换到数据分布。该文献不仅提出模型，并且将以往的DDPM模型和SMLD模型都统一使用SDE模型表达，实现了对扩散模型的解释与统一。
-2022年，Rombach[64] 等提出了隐扩散模型 LDM(Latent Diffusion Models, LDM)，因以往的扩散模型直接在图像空间扩散与训练，对计算资源、运算时间消耗大，LDM在隐空间作扩散训练，通过预训练的自编码模型来实现对图像像素空间与隐空间的转换。其中还内嵌条件生成机制，可以在模型中引入多种形态的条件机制，如文本、标签、语音、图像等条件信息。经过实验，其在图像生成、超分辨率、图像修复等诸多下游任务都有很好的表现，后续开源的文生图大模型StableDiffusion就使用的该隐扩散模型架构。
-% TODO 多模态
-\subsection{国内外文献综述的简析}
-目前已有的针对SIFT反向攻击方法中，传统方法效果普遍较差，且部分方法依赖于需要耗费大量精力准备的数据库。基于深度学习的方法虽然取得了优于传统方法的效果，但它们在充分揭示SIFT特征中包含的信息方面仍然存在局限性，并且重建图像的质量还没有达到令人满意的程度。
 \par
-综合本节内容，目前仍然需要对针对SIFT反向攻击方法的作进一步研究，以提升图像重建的效果和效率。
+在基于似然的模型方面，Kingma\cite{kingmaAutoEncodingVariationalBayes2022}等人提出了变分自编码器(Variational Auto-Encoder, VAE)模型，通过变分贝叶斯方法，将对原始图像数据的负对数似然的建模优化转为变分下界的计算。VAE模型包含编码器和解码器，其中编码器将原始图像映射到隐变量，解码器从采样的隐变量重建原始图像。
+Sohn\cite{sohnLearningStructuredOutput2015}等人在VAE的基础上提出了条件变分自编码器(Conditional Variational Auto-Encoder, CVAE) 模型，其在VAE的基础上，引入条件概率，使得在生成时能够按照标签条件生成。VAE与CVAE的区别在于数据产生方式，VAE是从隐变量采样后使用网络生成图像数据，而CVAE使用标签采样隐变量，再使用网络生成图像数据。
+Van\cite{vandenoordNeuralDiscreteRepresentation2017}等人提出了向量量化变分自编码器(VectorQuantisation Variational Auto-Encoder, VQ-VAE)，其在VAE基础上，采用了离散的隐变量，并单独训练一个自回归模型来学习隐变量的先验分布。相比于原始的VAE，VQ-VAE采用了离散编码，并且用了两阶段来生成，让隐变量的先验分布从高斯分布变成可学习的分布，提升了模型的学习能力。
+\par
+生成对抗模型(Generative Adversarial Networks, GAN)是由Goodfellow\cite{goodfellowGenerativeAdversarialNetworks2014}等人提出。这类模型主要是通过一个生成器G和一个判别器D的双方博弈完成训练。对于判别器而言，其优化期望能区分输入图像是生成图像的概率；对于生成器而言，其优化期望是能生成判别器难以分辨真伪的图像。
+Arjovsky\cite{arjovskyWassersteinGAN2017}等人提出WGAN(Wasserstein GAN,WGAN)模型，该文献认为原始GAN模型的损失函数中使用的对称的JS散度(Jensen–Shannon Divergence)不能很好体现两个分布之间的差距，使得在初始阶段分布差距过大时难以训练，而KL散度对生成器训练阶段的多样性与真实性的惩罚贡献不均衡，使得模型发生模式崩溃而难以生成多样性的样本。这项工作中使用了Wasserstein距离代替了JS散度，解决训练稳定性问题。
+Esser\cite{esserTamingTransformersHighResolution2021}等人在VQ-VQE的基础上，将VQ-VAE的编码生成器从pixelCNN换成了Transformer，并且在训练过程中加入使用PatchGAN的判别器以及对抗损失。通过使用Transformer做离散编码的生成器，隐变量的预测过程可以被视作自回归预测。经实验，VQGAN可以很好的完成高分辨图像的生成任务。
+
+\par
+在扩散模型方面，Ho\cite{hoDenoisingDiffusionProbabilistic2020}等人提出了第一个正式的去噪扩散模型DDPM(Denoising Diffusion Probabilistic Models, DDPM)，其包含一个前向的扩散过程和一个反向的生成过程。前向扩散过程中，将原始图像数按马尔科夫过程据逐步添加随机噪声，并逐步变成纯随机噪声；在反向生成过程中，将噪声数据每次去噪并采样，逐步恢复原始数据。DDPM对整个扩散生成过程建模，经过优化将问题转变为预测每一步的随机噪声，并采用神经网络对噪声预测拟合。
+Song\cite{songGenerativeModelingEstimating2019}等人提出了NCSN(Noise-Conditional Score Networks, NCSN)，其主要思路为分数匹配方法来估算数据分布的分数函数，并通过朗之万动力学采样实现采样生成。由于数据位于高维空间中的低维流行上，难以估计分数函数，则该文献提出了使用不同程度的噪声对其扰动，并联合估计分数函数。该工作可以视为DDPM扩散模型的另一种解释。
+Song\cite{songScoreBasedGenerativeModeling2021}等人针对扩散模型，提出了Score SDE框架统一并且解释了扩散模型。该文献从分数匹配与能量模型角度，提出了基于随机微分方程(StochasticDifferential Equations, SDE) 的去噪分数匹配模型。不同于DDPM的离散形式，使用随机微分方程建模的ScoreSDE是连续形式，正向过程通过SDE求解来注入噪声，将图像数据分布转换到已知的先验分布，并使用神经网络模型学习分数，反向过程通过预测并修正的采样方案，最终将噪声去除并从先验分布转换到数据分布。该文献不仅提出模型，并且将以往的DDPM模型和SMLD模型都统一使用SDE模型表达，实现了对扩散模型的解释与统一。
+Rombach\cite{rombachHighResolutionImageSynthesis2022}等人提出了隐扩散模型 LDM(Latent Diffusion Models, LDM)，因以往的扩散模型直接在图像空间扩散与训练，对计算资源、运算时间消耗大，LDM在隐空间作扩散训练，通过预训练的自编码模型来实现对图像像素空间与隐空间的转换。其中还内嵌条件生成机制，可以在模型中引入多种形态的条件机制，如文本、标签、语音、图像等条件信息。经过实验，其在图像生成、超分辨率、图像修复等诸多下游任务都有很好的表现。
+\par
+除了以上三类模型，在条件生成模型方面，还有不少工作取得了效果显著的成果。Radford \cite{pmlr-v139-radford21a}等提出文图对比预训练模型CLIP(Contrastive Language-Image Pre-training, CLIP)，为基于对比学习的多模态模型。该模型使用文本编码器和图像编码器，将文本与图像编码到相似的隐空间中。该文献打通了文本与图像的隔阂，将两者统一起来，后续许多工作的研究都采用了 CLIP 的引导实现的文生图与图生图功能。
+Ramesh \cite{pmlr-v139-ramesh21a}等人提出了DALL-E模型，这是一个由OpenAI开发的文本描述生成图像模型。该模型首先使用dVAE思路将图像编码为离散的隐变量，用Transformer模型将自然语言映射到隐变量，最后将隐变量融合成并使用解码器生成图像，通过CLIP辅助计算文本与图像的相关度。其中的dVAE、Transformer和CLIP都可以独立完成训练学习。
+\par
+大语言模型LLMs出现后，条件引导图像生成工作出现了一个新的思路，利用现成预训练好的大语言模型去生成图像，因此产生了多模态大模型\cite{zhang2024mmllmsrecentadvancesmultimodal}。
+Alayrac\cite{NEURIPS2022_960a172b}等人基于70B参数的Chinchilla大语言模型，训练出的Flamingo模型在5个任务达到了领先的水平。目前前的效果较好的生成模型规模普遍较大，训练过程长，所需资源多。为了解决根据下游任务重新训练大模型代价昂贵的问题，Hu\cite{hu2021loralowrankadaptationlarge}等人提出了低秩适应（LoRA）技术，通过冻结了预训练的模型权重，并将可训练的秩分解矩阵注入到 Transformer 架构的每一层中，大大减少了利用大模型进行下游任务的可训练参数的数量。LoRA作为一种有效的适应策略，既不会引入推理延迟，也不会减少输入序列长度，同时保持高模型质量。重要的是，通过共享绝大多数模型参数，它可以在部署为服务时实现快速任务切换。该项工作指出其所提出的原理通常适用于任何具有密集层的神经网络。
+
+\subsection{国内外文献综述的简析}
+目前已有的针对SIFT反向攻击方法工作可以分为传统方法和基于深度学习的方法，传统方法效果普遍较差，且部分方法依赖于需要耗费大量精力准备的数据库。基于深度学习的方法虽然取得了优于传统方法的效果，但它们在充分揭示SIFT特征中包含的信息方面仍然存在局限性，并且重建图像的质量还没有达到令人满意的程度。近年来，图像生成模型快速发展，利用GAN结构构建的CFGAN在针对SIFT的反向攻击表现出了不错的效果，但GAN系列模型训练困难、不稳定，且重建图像的效果仍有提升空间。同时，快速发展的文生图多模态大模型打通了文本与图像的隔阂，而多模态微调技术可以利用已有的预训练多模态模型对特定领域的知识进行学习，使其能够泛化到不同的研究领域。这一技术为不同模态之间的转换提供了新的思路，可以将多模态模型微调作为建立针对SIFT反向攻击的新的思路。
+\par
+综合本节内容，目前仍然需要对针对SIFT反向攻击方法的作进一步研究，以提升利用SIFT重建图像的效果和效率。
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{主要研究内容及研究方案}
 \subsection{主要研究内容}
 （撰写宜使用将来时态，不能只列出论文目录来代替对研究内容的分析论述）
 本节主要介绍本课题的两个主要研究内容，包括高精准度的SIFT反向攻击方法研究、高效率的SIFT反向攻击方法研究。
 \subsubsection{高精准度的SIFT反向攻击方法研究}
+SIFT反向攻击指的是将未知图像的SIFT局部特征作为输入，利用该信息生成出新的图像，目的是希望该图像尽可能接近原始图像。在过去的研究方法中，通过结合生成式模型的方法已经取得了一定的成果。然而，这种方法仍然存在以下两个可能的问题：（1）图像重建效果不够好，生成图像模糊，与原数据较大差距。（2）模型对SIFT中包含的信息未能充分利用，理解存在局限性。如使用GAN系列结构，由于GAN结构中生成过程为一步式生成，所提供的SIFT信息可能不足以对图像重建产生足够的约束。
+\par
+针对以上现存的问题，需要针对高精准度的SIFT反向攻击方法作出研究。一方面，需要提升图像重建的质量，另一方面，需要提升模型对SIFT信息的理解能力，以实现高精准度的SIFT反向攻击。
+
 \subsubsection{高效率的SIFT反向攻击方法研究}
+传统的SIFT反向攻击方法多基于外部数据库进行图像拼接以完成重建，而基于生成式模型的SIFT反向攻击效果较好的方法主要采用对抗网络方法辅助生成。于是产生如下可能的问题（1） 基于生成对抗网络辅助生成的方法，一方面生成对抗网络不是直接对目标数据分布建模，而是使用对抗式训练方法来衡量分布相似度，对数据分布的建模可能不够准确；另一方面生成对抗网络在训练时，存在难以训练难以收敛的问题，往往需要多次调参尝试才能成功训练模型。（2） 若攻击模型采用二阶段生成方法，如CFGAN，第二阶段依赖于第一阶段的输出图像，两个阶段无法同时进行，所需要的时间开销大，模型训练效率不高。
+\par
+针对以上问题，需要针对高效率的SIFT反向攻击方法作出研究。一方面，使用更高效的辅助生成方法来进行网络建模，另一方面，寻找开销更小的训练方法来完成图像重建任务。
+
 \subsection{研究方案}
-\subsubsection{SIFT及反向攻击研究}
-SIFT原理
-SIFT反向攻击通用思路
 \subsubsection{基于目标引导扩散模型的SIFT反向攻击研究}
-目标引导扩散模型原理
-SIFT作为目标，嵌入其中
+本研究提出一个高效率的模型反演方法，从公共数据集上训练的一般无条件生成网络，结合SIFT信息的分数作为引导，从而实现高效率的SIFT反向攻击。
+\par
+首先对SIFT反向攻击问题作出基本假设。记SIFT信息为y，对应的原始未知图像为$x \sim p(x)$，则SIFT信息的分布可以表示为 $p(y|x)$。研究的目标是对分布$p(x|y)$进行建模。以往的方法采用GAN模型作为生成器，其生成时是一步生成，难以使用分类引导生成。本研究使用基于 DDPM 的扩散模型，其前向扩散步骤与反向生成步骤可以表示为公式\eqref{eqn-1}和\eqref{eqn-2},
+\begin{equation}\label{eqn-1}
+      q(x_t|x_{0})=\mathcal{N}(x_t;\sqrt{\overline{\alpha}_t}x_{0},(1-\overline{\alpha}_t)I)
+\end{equation}
+
+\begin{equation}\label{eqn-2}
+      x_{t-1}= \frac{1}{\sqrt{\alpha_t}}
+      (x_t -
+      \frac{1-\alpha_T}{\sqrt{1-\overline{\alpha_t}}}
+      (\epsilon_\theta(x_t,t))) + \sigma_t z
+\end{equation}
+
+其中$z \sim \mathcal{N}(0,I)$，$x_T \sim \mathcal{N}(0,I)$，$\epsilon_\theta$ 是通过训练得到的关于$x_t$和$t$的噪音，$\alpha_t$ 为与扩散时间步t相关的参数，$\alpha_t$和$\overline{\alpha_t}$为前向过程中参数，在\ref{sec:finishwork}一节中详细说明。生成过程即通过从随机噪声 $x_T$ 的采样，迭代公式\eqref{eqn-2}，一步一步恢复图像直至 $x_0$ ，完成生成过程。
+\par
+以上过程为无条件图像重建的过程，接下来增加SIFT信息$y$对生成过程的引导和约束。对于条件概率贝叶斯公式的导数形式，可以有如下表示：
+
+\begin{equation}\label{eqn-3}
+      \nabla \log p(x|y) = \nabla \log p(x) + \nabla \log p(y|x)
+\end{equation}
+
+其中的 $y$ 表示分类标签，$\nabla \log p(x|y)$ 表示标签条件下的分数估计，而 $\nabla \log p(x)$表示无条件的分数，$\nabla \log p(y|x)$ 这个认为是图像条件下标签的分数估计。使用特威迪公式对 DDPM 的采样过程做估计可以得到如下表示：
+
+\begin{equation}\label{eqn-4}
+      \sqrt{\overline{\alpha}_t}x_0 = x_t + (1 - \overline{\alpha}_t) \cdot \nabla_x \log p(x_t) = x_t - \sqrt{1-\overline{\alpha}_t}\cdot\epsilon_\theta(x_t,t)
+\end{equation}
+
+于是可以推得 DDPM 模型中采样过程的网络输出与模型分数的关联：
+
+\begin{equation}\label{eqn-5}
+      \nabla_{x_t} \log p(x_t) = - \frac{1}{\sqrt{1-\overline{\alpha}_t}} \cdot\epsilon_\theta(x_t,t)
+\end{equation}
+
+代入公式\eqref{eqn-3}，得到以下结果：
+
+\begin{equation}\label{eqn-6}
+      \nabla \log p(x|y) = - \frac{1}{\sqrt{1-\overline{\alpha}_t}} \cdot\epsilon_\theta(x_t,t)
+      + \nabla \log p(y|x)
+\end{equation}
+
+若将$p(x|y)$视为生成过程，那么其与模型分数的关联可以表示为：
+
+\begin{equation}\label{eqn-7}
+      \nabla \log p(x|y) = - \frac{1}{\sqrt{1-\overline{\alpha}_t}} \cdot\hat{\epsilon}_\theta(x_t,t)
+\end{equation}
+
+联合公式\eqref{eqn-6}，则得到以下表达：
+
+\begin{equation}\label{eqn-8}
+      \hat{\epsilon}_\theta(x_t,t) = \epsilon_\theta(x_t,t) -\sqrt{1-\overline{\alpha}_t} \cdot \nabla \log p(y|x)_\theta(x_t,t)
+\end{equation}
+其中，公式\eqref{eqn-8}右边第一项为 DDPM 原本的模型噪声输出，右边第二项可以认为是从在当前图像上的模型图像分类器分数，而左边则为分类器分数调整后的模型噪声修正。
+
 \subsubsection{基于多模态模型微调的SIFT反向攻击研究}
-多模态模型原理，文本和图像如何嵌入同一特征空间
-微调手段，训练多模态模型理解SIFT的能力
+多模态模型是指能够同时处理多种类型数据，如文本、图像、视频等模态的大型神经网络模型。多模态模型可以划分为5个部分，模态编码器，LLM，模态解码器，以及两两之间的输入映射器和输出映射器。
+\par
+模态编码过程可以用$F_X = ME_X(I_X)$来表示，其中$X$表示模态，$ME_X$表示$X$模态的编码器，$I_X$表示该模态的输入。输入映射模块的任务是把多模态编码模块得到的$F_X$对齐到文本特征空间，得到$P_X$，然后再与文本$t$特征$F_T$作为LLM的输入。给定配对的数据集${I_X,t}$，输入映射模块的训练目标是：
+
+\begin{equation}\label{eqn-9}
+      argmin L(LLM(P_X,F_X),t)
+\end{equation}
+
+LLMs 作为核心，负责产生推理、上下文学习、链式思考、遵从指令的能力。它要产生文本和其他模态的tokens。这些tokens作为指令要决定是否产生其他模态的内容，如果是，则要产生相应的内容信号。LLM 的处理过程可以写成：
+
+\begin{equation}\label{eqn-10}
+      t,S_X = LLM(P_X,F_T)
+\end{equation}
+
+用输出模块将$S_X$映射到$H_X$，再把$H_X$作为后续多模态生成器的输入，最终模态生成器把$H_X$处理成特定的模态数据。
+\par
+根据以上多模态大模型的结构特点，可以使用微调技术训练多模态大模型，使其接受SIFT信息，并能将其对齐到文本特征空间，从而利用LLM能力进行图像及后续的多模态生成器进行图像重建任务。
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{预期达到的目标}
 预期目标可分为两个阶段：
-（1）完成条件引导DDPM模型构建以及训练过程，使其能够接受未知图像的SIFT，从SIFT出发反向出尽可能与原图像相似的图像。
-（2）使用微调方法对当前已有的预训练多模态模型进行训练，使其具备理解SIFT的能力，并能够从SIFT出发尽可能反向原图像。
+（1）完成条件引导DDPM模型构建以及训练过程，使其能够接受未知图像的SIFT，从SIFT出发重建出尽可能与原图像相似的图像。
+（2）使用微调方法对当前已有的预训练多模态模型进行训练，使其具备理解SIFT的能力，并能够从SIFT出发尽可能重建原图像。
 
 
 \section{已完成的研究工作与进度安排}
-\subsection{已完成的研究工作和取得的研究成果}
-%TODO CFGAN原理
-目前，已有相当多针对SIFT进行反向攻击的工作，其中效果较好的是CFGAN。本文深入研究了CFGAN网络结构与实现原理，利用该文章给出的模型，测试针对SIFT的反向攻击效果，得到以下结果。
+\subsection{已完成的研究工作和取得的研究成果}\label{sec:finishwork}
+\subsubsection{DDPM无条件扩散模型}\label{sec:DDPM}
+DDPM模型包含两个过程，前向扩散过程和反向生成过程，下面进行详细分析。
+前向扩散过程是指的对数据逐渐增加高斯噪音直至数据变成随机噪音的过程。
+\begin{equation}\label{eqn-11}
+      q(x_t|x_{t-1})=\mathcal{N}(x_t;\sqrt{1-\beta_t}x_{t-1},\beta_tI)
+\end{equation}
+
+其中$\{\beta_t\}^{T}_{t=1}$为每一步所采用的方差，介于0 ~ 1 之间。通常情况下，越后面的step会采用更大的方差。如果扩散步数T足够大，那么最终得到的$x_T$就完全丢失了原始数据而变成了一个随机噪音。扩散过程的每一步都生成一个带噪音的数据，整个扩散过程也就是一个马尔卡夫链：
+
+\begin{equation}\label{eqn-12}
+      q(x_{1::T}|x_0) = \Pi^T_{t=1}{q(x_t|x_{t-1})}
+\end{equation}
+
+扩散过程的一个重要特性是我们可以直接基于原始数据来对任意t步的$x_t$进行采样：$x_t \sim q(x_t|x_0)$。
+定义$\alpha_t = 1 - \beta_t$和$\overline{\alpha}_t=\Pi^t_{i=1}{\alpha_i}$，通过重参数技巧，随机从标准高斯分布中采样，再将采样值作为噪声在数据中扩散，那么有：
+
+$$\begin{aligned}
+x_t &= \sqrt{\alpha_t}x_{t-1} + \sqrt{1-\alpha_t}\varepsilon_{t-1} \\
+    &= \sqrt{\alpha_t}(\sqrt{\alpha_{t-1}}x_{t-2} + \sqrt{1-\alpha_{t-1}}\varepsilon_{t-2}) + \sqrt{1-\alpha_t}\varepsilon_{t-1} \\
+    &= \sqrt{\alpha_t\alpha_{t-1}}x_{t-2} + \sqrt{\sqrt{\alpha_t-\alpha_t\alpha_{t-1}^2}+ \sqrt{1-\alpha_t}^2}\overline{\varepsilon}_{t-2}; \\
+    &= \sqrt{\alpha_t\alpha_{t-1}}x_{t-2} + \sqrt{1-\alpha_t\alpha_{t-1}}\overline{\varepsilon}_{t-2} \\
+    &= \cdots \\
+    &= \sqrt{\overline{\alpha}_t}x_{0} + \sqrt{1-\overline{\alpha}_t}\varepsilon \label{eqn-13}
+\end{aligned}$$
+
+
+反重参数化后，我们得到:
+
+\begin{equation}\label{eqn-14}
+      q(x_t|x_{0})=\mathcal{N}(x_t;\sqrt{\overline{\alpha}_t}x_{0},(1-\overline{\alpha}_t)I)
+\end{equation}
+
+扩散过程是将数据噪音化，那么反向过程就是一个去噪的过程，如果我们知道反向过程的每一步的真实分布$q(x_{t-1}|x_t)$，那么从一个随机噪音$x_T \sim \mathcal{N}(0,I)$开始，逐渐去噪就能生成一个真实的样本，所以反向过程也就是生成数据的过程。
+
+估计分布$q(x_{t-1}|x_t)$需要用到整个训练样本，我们可以用神经网络来估计这些分布。这里，我们将反向过程也定义为一个马尔卡夫链，只不过它是由一系列用神经网络参数化的高斯分布来组成：
+$$\begin{aligned}
+      p_{\theta}(x_{0:T}) &= p(X_T)\Pi^T_{t=1}{p_{\theta}(x_{t-1}|x_t)} \\
+      p(x_T) &= \mathcal{N}(x_T;0,I)\\
+      p_{\theta}(x_{t-1}|x_t) &= \mathcal{N}(x_{t-1};\mu_{\theta}(x_t,t),\Sigma_{\theta}(x_t,t))
+\end{aligned}$$
+
+分布是$q(x_{t-1}|x_t)$不可直接处理的，但是加上条件$x_0$的后验分布$q(x_{t-1}|x_t,x_0)$却是可处理的，这里有:
+
+\begin{equation}\label{eqn-15}
+      q(x_{t-1}|x_t,x_0) = \mathcal{N}(x_{t-1};\widetilde{\mu}(x_t,x_0),\widetilde{\beta_t}I)
+\end{equation}
+利用贝叶斯公式
+
+\begin{equation}\label{eqn-16}
+      q(x_{t-1}|x_t,x_0) = q(x_{t}|x_{t-1},x_0)\frac{q(x_{t-1}|x_0)}{q(x_{t}|x_0)}
+\end{equation}
+
+第一项与$x_0$无关（马尔可夫链性质），分式两项可以从前向过程得到。因此可以计算。
+
+最终可以得到
+
+$$\begin{aligned}
+\widetilde{\beta_t} &= \frac{1 - \overline{\alpha}_{t-1}}{1 - \overline{\alpha}_{t}}\beta_t \\
+\widetilde{\mu}(x_t,x_0) &= \frac{\sqrt{\alpha_t}(1- \overline{\alpha}_{t-1})}{1- \overline{\alpha}_{t}}x_t + \frac{\sqrt{\overline{\alpha}_{t-1}}\beta_t}{1- \overline{\alpha}_{t}}x_0
+\end{aligned}$$
+可以看到方差是一个定量（扩散过程参数固定），而均值是一个依赖$x_0$和$x_t$的函数。
+
+上面介绍了扩散模型的扩散过程和反向过程，现在我们来从另外一个角度来看扩散模型：如果我们把中间产生的变量看成隐变量的话，那么扩散模型其实是包含$T$个隐变量的隐变量模型，它可以看成是一个特殊的层次化的VAE，相比VAE来说，扩散模型的隐变量是和原始数据同维度的，而且扩散过程是固定的。既然扩散模型是隐变量模型，那么我们可以就可以基于变分推断(评估两个分布差异最常用的方式是计算KL散度(相对熵))来得到variational lower bound（VLB，又称ELBO）作为最大化优化目标，这里有：
+
+$$\begin{aligned}
+\log{p_{\theta}(x_0)} &= \log{\int{p_{\theta}(x_{0:T})dx_{1:T}}};\\
+&=\log{\int{\frac{p_{\theta}(x_{0:T})q(x_{1:T}|x_0)}{q(x_{1:T}|x_0)}dx_{1:T}}} \\
+&\ge \mathbb{E}_{q(x_{1:T}|x_0)}[\log{\frac{p_{\theta}(x_{0:T})}{q(x_{1:T}|x_0)}}]
+\end{aligned}$$
+
+则训练目标为：
+
+\begin{equation}\label{eqn-18}
+L = - L_{VLB} = \mathbb{E}_{q(x_{1:T}|x_0)}[-\log{\frac{p_{\theta}(x_{0:T})}{q(x_{1:T}|x_0)}}] = \mathbb{E}_{q(x_{1:T}|x_0)}[\log{\frac{q(x_{1:T}|x_0)}{p_{\theta}(x_{0:T})}}]
+\end{equation}
+
+最终得到：
+
+$$\begin{aligned}
+      L &= \underbrace{D_{KL}(q(x_T|x_0) || p_\theta(x_T))}_{L_T} \\
+      &\qquad + \sum^T_{t=2}{\underbrace{\mathbb{E}_{q(x_t|x_0)}[D_{KL}(q(x_{t-1}|x_t,x_0) || p_\theta(x_{t-1}|x_t))]}_{L_{t-1}}} \\
+      &\qquad- \underbrace{\mathbb{E}_{q(x_1|x_0)}\log{p_\theta(x_0|x_1)}}_{L_0}
+\end{aligned}$$
+
+在这里对模型做进一步简化，采用固定的方差$\Sigma_\theta=\sigma^2_tI$，则优化目标 $L_{t-1}$可以变换为：
+
+\begin{equation}\label{eqn-21}
+L_{t-1}=\mathbb{E}_{q(x_t|x_0)}[\frac{1}{2\sigma^2_t}\Vert \widetilde{\mu}_t(x_t,x_0)-\mu(x_t,t) \Vert^2]
+\end{equation}
+从上述公式来看，我们是希望网络学习到的均值和后验分布的均值一致。从另外一个角度利用重新参数化技巧。在我们对$q ( x_t | x_0 )$形式的推导中，我们可以整理结果，将$x_0$视为变量，来得到以下结果：
+\begin{equation}\label{eqn-22}
+      x_0 = \frac{x_t - \sqrt{1-\overline{\alpha}_t}\epsilon_0}{\sqrt{\overline{\alpha}_t}}
+\end{equation}
+将其代入我们之前推导的真去噪转移均值$\mu( x_t , x_0)$，我们可以重新推导为：
+\begin{equation}\label{eqn-23}
+      L_{t-1}=\mathbb{E}_{x_0,\epsilon \sim \mathcal{N}(0,I)}[\lVert \epsilon - \epsilon_\theta (\sqrt{\overline{\alpha}_t}x_0 + \sqrt{1 - \overline{\alpha}_t}\epsilon,t)\rVert^2_2]
+\end{equation}
+以上结果表明通过预测原始图像x0来学习DDPM等价于学习预测噪声。
+\subsubsection{基于得分函数的DDPM模型解释与条件引导生成}
+对于一个高斯变量$z\sim \mathcal{N} ( z ; \mu_z , \Sigma_z)$，特威迪的公式为：
+
+\begin{equation}\label{eqn-24}
+\mathbb{E}[\mu_z | z] = z + \Sigma_z\nabla_z\log{p(z)}
+\end{equation}
+
+在这种情况下，我们应用它来预测给定样本的$x_t$的真实后验均值。由之前的结果：
+
+\begin{equation}\label{eqn-25}
+      q(x_t|x_0) = \mathcal{N}(x_t;\sqrt{\overline{\alpha}_t}x_0,(1-\overline{\alpha}_t)I)
+\end{equation}
+
+然后，由特威迪的公式，我们有：
+
+\begin{equation}\label{eqn-26}
+  \mathbb{E}[\mu_{x_t} | x_t] = x_t + (1-\overline{\alpha_t})\nabla_{x_t}\log{p(x_t)}
+\end{equation}
+
+根据特威迪公式，真实均值最佳估计定义为：
+
+\begin{equation}\label{eqn-27}
+  \sqrt{\overline{\alpha}_t}x_0 = x_t + (1-\overline{\alpha_t})\nabla_{x_t}\log{p(x_t)}
+\end{equation}
+
+\begin{equation}\label{eqn-28}
+  x_0 =\frac{ x_t + (1-\overline{\alpha_t})\nabla_{x_t}\log{p(x_t)}}{\sqrt{\overline{\alpha}_t}}
+\end{equation}
+
+然后，我们可以将上述方程再次代入\ref{sec:DDPM}节$\mu_( x_t , x_0)$并推导出新优化目标的形式：
+\begin{equation}\label{eqn-29}
+      L_{t-1}=\mathbb{E}_{x_0,\epsilon \sim \mathcal{N}(0,I)}[\lVert s_\theta(x_t,t) - \nabla \log p(x_t)\rVert^2_2]
+\end{equation}
+
+这里，学习预测得分函数$\nabla_{x_t}\log{p(x_t)}$，它是对于任意的噪声水平t,$x_t$在数据空间的梯度，
+
+注意到得分函数$\nabla_{x_t}\log{p(x_t)}$在形式上与源噪声非常相似。这可以通过将特威迪的公式和重新参数化技巧结合起来显示出来：
+
+$$\begin{aligned}
+      x_0 &= \frac{
+            x_t+(1-\overline{\alpha}_t)\nabla_{x_t}\log{p(x_t)}
+          }{
+            \sqrt{\overline{\alpha}_t}
+          }
+          &= \frac{
+            x_t-(1-\overline{\alpha}_t)\epsilon_0
+          }{
+            \sqrt{\overline{\alpha}_t}
+          } \\
+          &\therefore
+        (1-\overline{\alpha}_t)\nabla_{x_t}\log{p(x_t)} =
+        (1-\overline{\alpha}_t)\epsilon_0 \\
+        &\nabla_{x_t}\log{p(x_t)} = -\frac{
+          1
+        }{
+           \sqrt{1-\overline{\alpha}_t}
+        }\epsilon_0
+\end{aligned}$$
+
 \subsection{进度安排}
       2024.06~2024.08\quad 查阅相关文献，确定课题内容及方案。
-\par  2024.08-2024.10\quad 完成3.2节研究方案中第一步，对现有SIFT反向攻击算法进行研究与分析。
-\par  2024.10-2025.01\quad 完成3.2节研究方案中第二步，探索分析现有DDPM模型及算法，以及应用在SIFT反向攻击的可能性，并将适用的算法尝试应用其中。
-\par  2025.01-2025.04\quad 继续3.2节研究方案中第二步，对应用于SIFT反向攻击的DDPM模型及算法进行实验，与已有算法进行对比分析。
-\par  2025.04-2025.07\quad 完成3.2节研究方案中第三步，设计基于多模态模型的微调方法，利用多模态模型加速SIFT反向攻击实现。
+\par  2024.08-2024.10\quad 对现有SIFT反向攻击算法进行研究与分析,实现先前工作，完善论文框架。
+\par  2024.10-2025.01\quad 探索分析现有DDPM模型及算法，以及应用在SIFT反向攻击的可能性，并将适用的算法尝试应用其中。
+\par  2025.01-2025.04\quad 对应用于SIFT反向攻击的DDPM模型及算法进行实验，与已有算法进行对比分析。
+\par  2025.04-2025.07\quad 设计基于多模态模型的微调方法，利用多模态模型加速SIFT反向攻击实现。
 \par  2025.07-2025.10\quad 撰写毕业论文，准备答辩。
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{为完成课题已具备和所需的条件和经费}
