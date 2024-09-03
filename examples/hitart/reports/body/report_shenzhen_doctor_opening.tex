@@ -261,7 +261,7 @@ L = - L_{VLB} = \mathbb{E}_{q(x_{1:T}|x_0)}[-\log{\frac{p_{\theta}(x_{0:T})}{q(x
 \par
 在这里对模型做进一步简化，采用固定的方差$\Sigma_\theta=\sigma^2_tI$，利用高斯分布计算KL散度的公式，经推导优化目标$L_{t-1}$可以变换为：
 \begin{equation}\label{eqn-24}
-L_{t-1}=\mathbb{E}_{q(x_t|x_0)}[\frac{1}{2\sigma^2_t}\Vert \widetilde{\mu}_t(x_t,x_0)-\mu(x_t,t) \Vert^2]
+L_{t-1}=\mathbb{E}_{q(x_t|x_0)}[\frac{1}{2\sigma^2_t}\lVert \widetilde{\mu}_t(x_t,x_0)-\mu(x_t,t) \rVert^2_2]
 \end{equation}
 \par
 从上述公式来看，扩散模型希望网络学习到的均值和后验分布的均值一致。从另外一个角度利用重新参数化技巧。在对$q ( x_t | x_0 )$形式的推导以及公式\eqref{eqn-13}中，重新整理结果，将$x_0$视为变量，来得到以下结果：
