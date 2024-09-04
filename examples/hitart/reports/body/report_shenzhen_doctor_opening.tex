@@ -136,7 +136,7 @@ Alayrac\cite{NEURIPS2022_960a172b}等人基于70B参数的Chinchilla大语言模
 \par
 联合公式\eqref{eqn-6}，则得到以下表达：
 \begin{equation}\label{eqn-8}
-      \hat{\epsilon}_\theta(x_t,t) = \epsilon_\theta(x_t,t) -\sqrt{1-\overline{\alpha}_t} \cdot \nabla \log p(y|x)_\theta(x_t,t)
+      \hat{\epsilon}_\theta(x_t,t) = \epsilon_\theta(x_t,t) -\sqrt{1-\overline{\alpha}_t} \cdot \nabla \log p(y|x)
 \end{equation}
 \par
 其中，公式\eqref{eqn-8}等号右边第一项为扩散模型原本的模型噪声输出，右边第二项可以认为是在当前图像上的模型图像分类器分数，而等号左边则为分类器分数调整后的模型噪声修正。
