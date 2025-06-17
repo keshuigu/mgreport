@@ -78,12 +78,7 @@ Model Inverse Attack（模型逆向攻击）是指攻击者利用对模型的访
   \item \textbf{初步实验}：对模板匹配攻击和模型逆向攻击进行了初步实验，验证了相关理论的可行性，并收集了初步数据。
   \item \textbf{结果分析}：对实验结果进行了初步分析，发现模板匹配攻击在特征数据库完整性较高时效果显著，而模型逆向攻击则在特定条件下能够有效恢复训练数据。
 \end{itemize}
-
 针对TI的隐私泄露问题，设计了如下的网络结构和攻击流程，其中扩散模型的核心部分采用了EDM（Elucidated Diffusion Models，明晰扩散模型）
-
-
-
-
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%
 EDM（Elucidated Diffusion Models，明晰扩散模型）是扩散概率模型（Diffusion Probabilistic Models）领域的重要进展，由Karras等人在2022年提出。EDM对扩散过程的噪声调度、采样策略和损失函数进行了系统性分析和优化，极大提升了扩散模型的采样效率和生成质量。
@@ -133,12 +128,29 @@ EDM（Elucidated Diffusion Models，明晰扩散模型）是扩散概率模型�
 \end{figure}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
+形式化的训练流程如下：
+
+以EDM扩散模型为基础，设计了两阶段的训练流程：
+第一阶段构建图片与特征模板之间的映射关系，将特征模板作为条件输入，嵌入到EDM模型中，使得模型学会如何生成人脸图像
+$$
+  \mathcal{L}(\theta) = \mathbb{E}_{x_0, \sigma, \epsilon} \left[ w(\sigma) \left\| f_\theta(x_0 + \sigma \epsilon,y,\sigma) - x_0 \right\|^2 \right]
+$$
+
+
+第二阶段则通过优化算法重建与目标类别匹配的原始输入图像。
+
+$$
+  \mathcal{L}(\theta) = \mathbb{E}_{x_0, \sigma, \epsilon} \left[ w(\sigma) \left\|  f_\theta(x_0 + \sigma \epsilon,y,\sigma) - x_0 \right\|^2 \right]
+  + \lambda \| F( f_\theta(x_0 + \sigma \epsilon,y,\sigma)) - F(x_0) \|^2
+$$
+
+
 实验设置：
-实验中使用了公开的图像数据集（如CIFAR-10、ImageNet等），对模型进行了预训练，并在特征提取阶段采用了SIFT（尺度不变特征变换）算法提取关键点特征。模板匹配攻击通过计算特征模板与输入图像特征之间的相似度进行身份识别。
+实验中使用了公开的图像数据集celeba，使用arcface r100模型作为攻击目标，利用arcface模型生成了图像与其对应的特征的模板，并构成训练所使用的数据集。
 
 实验得到以下结果：
 \begin{itemize}
-  \item \textbf{识别准确率}：在特征数据库完整的情况下，模板匹配攻击的识别准确率达到了85%以上，表明该方法在特定条件下具有较强的隐私泄露能力。
+  \item \textbf{识别准确率}：在特征数据库完整的情况下，模板匹配攻击的识别准确率达到了85\%以上，表明该方法在特定条件下具有较强的隐私泄露能力。
   \item \textbf{重建效果}：通过优化算法，能够有效重建与模板匹配的原始输入图像，重建质量较高。
   \item \textbf{抗干扰性}：在添加噪声或对抗样本的情况下，模板匹配攻击的效果有所下降，但仍能保持一定的识别能力。
 \end{itemize}
