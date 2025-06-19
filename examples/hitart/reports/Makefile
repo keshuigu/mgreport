@@ -2,7 +2,7 @@
 # Compiling method: latexmk/xelatex
 METHOD = xelatex
 # Set opts for latexmk if you use it
-LATEXMKOPTS = -xelatex
+LATEXMKOPTS = -xelatex -shell-escape
 # Basename of thesis
 REPORTMAIN = report
 
@@ -38,11 +38,11 @@ $(REPORTMAIN).pdf: $(CLSFILES)
 else ifeq ($(METHOD),xelatex)
 
 $(REPORTMAIN).pdf: $(CLSFILES) $(REPORTCONTENTS) $(REPORTMAIN).bbl
-	$(METHOD) $(REPORTMAIN)
-	$(METHOD) $(REPORTMAIN)
+	$(METHOD) -shell-escape $(REPORTMAIN)
+	$(METHOD) -shell-escape $(REPORTMAIN)
 
 $(REPORTMAIN).bbl: $(BIBFILE)
-	$(METHOD) $(REPORTMAIN)
+	$(METHOD) -shell-escape $(REPORTMAIN)
 	-bibtex $(REPORTMAIN)
 	$(RM) $(REPORTMAIN).pdf
 
