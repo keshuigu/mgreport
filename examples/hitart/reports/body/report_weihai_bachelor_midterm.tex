@@ -83,22 +83,22 @@ EDM的采样过程可用如下随机微分方程描述：
 模板反演攻击模型训练的具体步骤如算法\ref{alg:edm_tia_train}所示：
 
 \begin{algorithm}[H]
-\caption{模板反演攻击模型训练}
-\label{alg:edm_tia_train}
-\begin{algorithmic}[1]
-\STATE 初始化扩模型参数 $f_\theta$ ，加载特征提取网络$F$
-\FOR{迭代 $=1$ 到 $N$}
+  \caption{模板反演攻击模型训练}
+  \label{alg:edm_tia_train}
+  \begin{algorithmic}[1]
+    \STATE 初始化扩模型参数 $f_\theta$ ，加载特征提取网络$F$
+    \FOR{迭代 $=1$ 到 $N$}
     \STATE 随机采样一批训练样本 $(x_0, y_0)$
     \FOR{每个样本 $(x_0, y_0)$}
-        \STATE 采样噪声 $\epsilon \sim \mathcal{N}(0, I)$，噪声幅度 $\sigma$
-        \STATE 计算带噪输入 $x = x_0 + \sigma \epsilon$
-        \STATE 生成图像 $\hat{x} = f_\theta(x, y_0, \sigma)$
-        \STATE 计算损失 $\mathcal{L}(\theta) = \mathbb{E}_{x_0, \sigma, \epsilon} \left[ w(\sigma) \left\|  f_\theta(x_0 + \sigma \epsilon,y_0,\sigma) - x_0 \right\|^2 \right]
-  + \lambda \| F( f_\theta(x_0 + \sigma \epsilon,y_0,\sigma)) - F(x_0) \|^2$
+    \STATE 采样噪声 $\epsilon \sim \mathcal{N}(0, I)$，噪声幅度 $\sigma$
+    \STATE 计算带噪输入 $x = x_0 + \sigma \epsilon$
+    \STATE 生成图像 $\hat{x} = f_\theta(x, y_0, \sigma)$
+    \STATE 计算损失 $\mathcal{L}(\theta) = \mathbb{E}_{x_0, \sigma, \epsilon} \left[ w(\sigma) \left\|  f_\theta(x_0 + \sigma \epsilon,y_0,\sigma) - x_0 \right\|^2 \right]
+      + \lambda \| F( f_\theta(x_0 + \sigma \epsilon,y_0,\sigma)) - F(x_0) \|^2$
     \ENDFOR
     \STATE 更新 $\theta$以最小化 $\mathcal{L}(\theta)$
-\ENDFOR
-\end{algorithmic}
+    \ENDFOR
+  \end{algorithmic}
 \end{algorithm}
 
 
@@ -151,24 +151,23 @@ EDM的采样过程可用如下随机微分方程描述：
   \caption{各项图像质量评价指标结果}
   \begin{tabular}{lc}
     \hline
-    指标        & 数值    \\
+    指标         & 数值              \\
     \hline
-    FID        & 24.2328861008408 \\
-    SSIM        & 0.5096  \\
-    FSIM        & 0.7462  \\
-    VSI         & 0.8902  \\
-    HaarPSI     & 0.4884  \\
-    SRSIM       & 0.8655  \\
-    DSS         & 0.5990  \\
-    MDSI        & 0.5331  \\
-    LPIPS Alex  & 0.3176  \\
+    FID        & 24.2328         \\
+    KID        & 0.0090 ± 0.0024 \\
+    IS         & 2.8405 ± 0.0114 \\
+    LPIPS Alex & 0.3176          \\
     \hline
   \end{tabular}
   \label{tab:quality_metrics}
 \end{table}
 
 % Kernel Inception Distance: 0.009391505859375008 ± 0.0024141626413522015
-
+% Inception Score: 2.84054222110179 ± 0.011451151473055468
+% Inception Score: 2.84054222110179 ± 0.011451151473055468
+% Caching /home/yu/workspace/mia/data-inception-v3-compat-stat-fid-2048.pt
+% Frechet Inception Distance: 24.2328861008408
+% Kernel Inception Distance: 0.00908864868368369 ± 0.0006153112103318906
 部分生成图像如图\ref{fig:edm_tia_sample}所示。可以看出，所提出的方法能够有效地重建与目标特征模板相匹配的人脸图像。生成的人脸图像在整体结构、面部特征等方面与原始输入图像高度相似，且具备较高的视觉质量。
 
 \begin{figure}[!htbp]
@@ -222,17 +221,17 @@ EDM的采样过程可用如下随机微分方程描述：
   \centering
   \begin{tabular}{lc}
     \hline
-    时间节点     & 主要任务  \\
+    时间节点     & 主要任务                          \\
     \hline
-    2025年07月 & 设计结合生成模型的模型反演攻击方法，实现相关代码 \\
+    2025年07月 & 设计结合生成模型的模型反演攻击方法，实现相关代码      \\
     \hline
-    2025年08月 & 进行实验并分析结果，优化模型结果 \\
+    2025年08月 & 进行实验并分析结果，优化模型结果              \\
     \hline
     2025年09月 & 进行大规模实验，验证两种攻击在不同数据集和模型架构下的效果 \\
     \hline
-    2025年11月 & 撰写论文初稿 \\
+    2025年11月 & 撰写论文初稿                        \\
     \hline
-    2025年12月 & 完善论文，准备答辩材料 \\
+    2025年12月 & 完善论文，准备答辩材料                   \\
     \hline
   \end{tabular}
   \caption{后期研究进度安排表}
