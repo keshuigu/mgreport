@@ -86,17 +86,21 @@ EDM的采样过程可用如下随机微分方程描述：
   \caption{模板反演攻击模型训练}
   \label{alg:edm_tia_train}
   \begin{algorithmic}[1]
-    \STATE 初始化扩模型参数 $f_\theta$ ，加载特征提取网络$F$
+    \REQUIRE 训练样本集 $\mathcal{D}$，扩散生成模型 $f_\theta$，特征提取网络 $F$
+    \ENSURE 训练好的生成模型参数 $f_\theta$
     \FOR{迭代 $=1$ 到 $N$}
-    \STATE 随机采样一批训练样本 $(x_0, y_0)$
-    \FOR{每个样本 $(x_0, y_0)$}
-    \STATE 采样噪声 $\epsilon \sim \mathcal{N}(0, I)$，噪声幅度 $\sigma$
-    \STATE 计算带噪输入 $x = x_0 + \sigma \epsilon$
-    \STATE 生成图像 $\hat{x} = f_\theta(x, y_0, \sigma)$
-    \STATE 计算损失 $\mathcal{L}(\theta) = \mathbb{E}_{x_0, \sigma, \epsilon} \left[ w(\sigma) \left\|  f_\theta(x_0 + \sigma \epsilon,y_0,\sigma) - x_0 \right\|^2 \right]
-      + \lambda \| F( f_\theta(x_0 + \sigma \epsilon,y_0,\sigma)) - F(x_0) \|^2$
-    \ENDFOR
-    \STATE 更新 $\theta$以最小化 $\mathcal{L}(\theta)$
+      \STATE 随机采样一批训练样本 $(x_0, y_0)$
+      \FOR{每个样本 $(x_0, y_0)$}
+        \STATE 采样噪声 $\epsilon \sim \mathcal{N}(0, I)$，噪声幅度 $\sigma$
+        \STATE 计算带噪输入 $x = x_0 + \sigma \epsilon$
+        \STATE 生成图像 $\hat{x} = f_\theta(x, y_0, \sigma)$
+        \STATE 计算损失
+        \[
+        \mathcal{L}(\theta) = \mathbb{E}_{x_0, \sigma, \epsilon} \left[ w(\sigma) \left\|  f_\theta(x_0 + \sigma \epsilon,y_0,\sigma) - x_0 \right\|^2 \right]
+        + \lambda \| F( f_\theta(x_0 + \sigma \epsilon,y_0,\sigma)) - F(x_0) \|^2
+        \]
+      \ENDFOR
+      \STATE 更新 $\theta$ 以最小化 $\mathcal{L}(\theta)$
     \ENDFOR
   \end{algorithmic}
 \end{algorithm}
@@ -239,9 +243,10 @@ EDM的采样过程可用如下随机微分方程描述：
   \caption{模型反演攻击训练流程}
   \label{alg:edm_mia_train}
   \begin{algorithmic}[1]
-    \STATE 初始化生成模型参数 $f_\theta$，加载目标分类模型 $F$
+    \REQUIRE 训练样本集 $\mathcal{D}$，预训练换脸生成模型 $f_\theta$，目标分类模型 $F$
+    \ENSURE 微调后的换脸生成模型 $f_\theta$
     \FOR{迭代 $=1$ 到 $N$}
-      \STATE 随机采样训练样本$x$作为待重建人脸，$x_0$作为待替换人脸图像
+      \STATE 随机采样训练样本 $x$ 作为待重建人脸，$x_0$ 作为待替换人脸图像
       \FOR{每个样本 $x$}
         \STATE 计算标签 $y = F(x)$
         \STATE 生成伪造图像 $x' = f_\theta(x_0, y)$
